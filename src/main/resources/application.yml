@@ -5,6 +5,7 @@ spring:
     username: sa
     password:
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: create #create,update,none
       naming: #?? ?? ??? ??? ????
