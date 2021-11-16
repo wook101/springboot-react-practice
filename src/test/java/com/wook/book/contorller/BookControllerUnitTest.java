@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wook.book.domain.Book;
 import com.wook.book.service.BookService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -13,7 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,8 +36,10 @@ public class BookControllerUnitTest {
     @MockBean
     private BookService bookService;
 
+
     @Test
-    public void 컨트롤러_저장_테스트() throws Exception{
+    @DisplayName("컨트롤러_저장_테스트")
+    public void save() throws Exception{
         //given(테스트 하기위한 준비단계)
         Book book = new Book(null,"Springboot와 react","김유빈");
         String jsonData = new ObjectMapper().writeValueAsString(book); //json으로 요청해야 하기 때문에 json으로 만들기
@@ -51,4 +58,31 @@ public class BookControllerUnitTest {
                 .andDo(MockMvcResultHandlers.print());
 
     }
+
+    @Test
+    @DisplayName("컨트롤러 전체목록 조회 단위 테스트")
+    public void findAll() throws Exception{
+        //given
+        List<Book> books = new ArrayList<>();
+        books.add(new Book(1L,"파이썬","이동욱"));
+        books.add(new Book(2L,"자바","박동욱"));
+        books.add(new Book(3L,"C언어","김동욱"));
+        when(bookService.selectAll()).thenReturn(books);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/book")
+                .accept(MediaType.APPLICATION_JSON_UTF8));//accept는 Response, APPLICATION_JSON_UTF8 한글깨짐 방지
+
+        //then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].title").value("파이썬"))
+                .andExpect(jsonPath("$.[1].title").value("자바"))
+                .andExpect(jsonPath("$.[2].title").value("C언어"))
+                .andDo(MockMvcResultHandlers.print());
+
+    }
+
+
+
 }
