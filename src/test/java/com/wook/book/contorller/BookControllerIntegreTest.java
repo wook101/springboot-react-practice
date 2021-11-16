@@ -3,6 +3,7 @@ package com.wook.book.contorller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wook.book.domain.Book;
 import com.wook.book.repositroy.BookRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import java.util.ArrayList;
@@ -38,11 +40,21 @@ public class BookControllerIntegreTest {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
+
+    //각각 테스트 코드를 실행하기 하기전에 autoincrement를 4로 초기화
+    @BeforeEach
+    public void init(){
+        entityManager.createNativeQuery("ALTER TABLE book ALTER COLUMN id RESTART WITH 4").executeUpdate();
+    }
+
     @Test
     @DisplayName("컨트롤러 저장 통합 테스트")
     public void sava_테스트() throws Exception{
         //given(테스트 하기위한 준비단계)
-        Book book = new Book(null,"Springboot와 react","김유빈");
+        Book book = new Book(null,"springboot react","김유빈");
         String jsonData = new ObjectMapper().writeValueAsString(book); //json으로 요청해야 하기 때문에 json으로 만들기
 
 
@@ -65,9 +77,9 @@ public class BookControllerIntegreTest {
     public void findAll() throws Exception{
         //given
         List<Book> books = new ArrayList<>();
-        books.add(new Book(4L,"파이썬","이동욱"));
-        books.add(new Book(5L,"자바","박동욱"));
-        books.add(new Book(6L,"C언어","김동욱"));
+        books.add(new Book(null,"파이썬","이동욱"));
+        books.add(new Book(null,"자바","박동욱"));
+        books.add(new Book(null,"C언어","김동욱"));
         bookRepository.saveAll(books);
 
         //when
@@ -77,6 +89,7 @@ public class BookControllerIntegreTest {
         //then
         resultActions
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[3].id").value(4L))
                 .andExpect(jsonPath("$.[3].title").value("파이썬"))
                 .andExpect(jsonPath("$.[4].title").value("자바"))
                 .andExpect(jsonPath("$.[5].title").value("C언어"))
