@@ -83,6 +83,26 @@ public class BookControllerUnitTest {
 
     }
 
+    @Test
+    @DisplayName("id로 한건 가젹오기")
+    public void findById() throws Exception{
+        //given
+        Long id = 10L;
+        Book book = new Book(id,"코딩의정석","이수지");
+        when(bookService.selectById(id)).thenReturn(book);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/book/{id}",id)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
+
+        //then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("코딩의정석"))
+                .andExpect(jsonPath("$.auther").value("이수지"))
+                .andDo(MockMvcResultHandlers.print());
+
+    }
 
 
 }
