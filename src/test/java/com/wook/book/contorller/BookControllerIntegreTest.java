@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,17 +43,17 @@ public class BookControllerIntegreTest {
     private EntityManager entityManager;
 
 
-    //각각 테스트 코드를 실행하기 하기전에 autoincrement를 4로 초기화
+    //각각 테스트 코드를 실행하기 하기전에 autoincrement를 1로 초기화
     @BeforeEach
     public void init(){
-        entityManager.createNativeQuery("ALTER TABLE book ALTER COLUMN id RESTART WITH 4").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE book ALTER COLUMN id RESTART WITH 1").executeUpdate();
     }
 
     @Test
     @DisplayName("컨트롤러 저장 통합 테스트")
-    public void sava_테스트() throws Exception{
+    public void save_테스트() throws Exception{
         //given(테스트 하기위한 준비단계)
-        Book book = new Book(null,"springboot react","김유빈");
+        Book book = new Book(null,"springboot와react","김유빈");
         String jsonData = new ObjectMapper().writeValueAsString(book); //json으로 요청해야 하기 때문에 json으로 만들기
 
 
@@ -67,6 +66,7 @@ public class BookControllerIntegreTest {
         //then(검증)
         resultActions
                 .andExpect(status().isCreated())   //상태코드 201을 기대
+                .andExpect(jsonPath("$.title").value("springboot와react"))
                 .andExpect(jsonPath("$.auther").value("김유빈"))
                 .andDo(MockMvcResultHandlers.print());
 
@@ -89,10 +89,10 @@ public class BookControllerIntegreTest {
         //then
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[3].id").value(4L))
-                .andExpect(jsonPath("$.[3].title").value("파이썬"))
-                .andExpect(jsonPath("$.[4].title").value("자바"))
-                .andExpect(jsonPath("$.[5].title").value("C언어"))
+                .andExpect(jsonPath("$.[0].id").value(1L))
+                .andExpect(jsonPath("$.[0].title").value("파이썬"))
+                .andExpect(jsonPath("$.[1].title").value("자바"))
+                .andExpect(jsonPath("$.[2].title").value("C언어"))
                 .andDo(MockMvcResultHandlers.print());
 
     }
@@ -101,7 +101,7 @@ public class BookControllerIntegreTest {
     @DisplayName("id를 통해 한건 가져오기 통합 테스트")
     public void findById() throws Exception{
         //given
-        Long id = 4L;
+        Long id = 1L;
         Book book = new Book(null,"뇌를 자극하는 c++","이두희");
         bookRepository.save(book);
 
@@ -116,5 +116,32 @@ public class BookControllerIntegreTest {
                 .andDo(MockMvcResultHandlers.print());
 
     }
+
+    @Test
+    @DisplayName("1건 수정하기 통합 테스트")
+    public void updateByid() throws Exception{ //boo1을 book2로 수정한다.
+        //given
+        Long id = 1L;
+        Book book1 = new Book(id,"뇌를 자극하는 c++","이두희");
+        bookRepository.save(book1);
+        Book book2 = new Book(null,"뇌를 자극하는 android","김유지");
+        String jsonData = new ObjectMapper().writeValueAsString(book2);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(put("/book/{id}",id)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(jsonData)
+                        .accept(MediaType.APPLICATION_JSON_UTF8));
+
+        //then
+        resultActions
+                .andExpect(jsonPath("$.title").value("뇌를 자극하는 android"))
+                .andExpect(jsonPath("$.auther").value("김유지"))
+                .andDo(MockMvcResultHandlers.print());
+
+    }
+
+
+
 
 }
