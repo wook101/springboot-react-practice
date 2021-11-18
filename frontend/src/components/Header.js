@@ -1,16 +1,17 @@
 import React from 'react';
 import { Container, Nav, Navbar } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     return (
         <>
         <Navbar bg="dark" variant="dark">
             <Container>
-            <Navbar.Brand href="#home">Navbar</Navbar.Brand>
+            <Link to="/" className="navbar-brand">홈</Link>
             <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#features">Features</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
+             <Link to="/saveForm" className="nav-link">글쓰기</Link>
+             <Link to="/book:id" className="nav-link">상세보기</Link>
+             <Link to="/updateForm" className="nav-link">수정하기</Link>
             </Nav>
             </Container>
         </Navbar>
