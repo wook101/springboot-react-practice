@@ -126,5 +126,22 @@ public class BookControllerUnitTest {
 
     }
 
+    @Test
+    @DisplayName("한건 삭제하기 단위 테스트")
+    public void deleteById() throws Exception{
+        //given
+        Long id = 1L;
+        when(bookService.delete(id)).thenReturn("ok2");
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/book/{id}",id)
+                .accept(MediaType.TEXT_PLAIN));
+
+        //then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print());
+
+    }
 
 }
