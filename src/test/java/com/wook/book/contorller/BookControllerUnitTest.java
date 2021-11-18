@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -101,6 +100,29 @@ public class BookControllerUnitTest {
                 .andExpect(jsonPath("$.title").value("코딩의정석"))
                 .andExpect(jsonPath("$.auther").value("이수지"))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @DisplayName("컨트롤러 한 건 수정하기 단위테스트")
+    public void updateById() throws Exception{
+        //given
+        Long id = 1L;
+        Book book = new Book(null,"뇌를 자극하는 c++","이두희");
+        String jsonData = new ObjectMapper().writeValueAsString(book);
+        when(bookService.update(id,book)).thenReturn(new Book(null,"뇌를 자극하는 c++","이두희"));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(put("/book/{id}",id)
+                                            .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                            .content(jsonData)
+                                            .accept(MediaType.APPLICATION_JSON_UTF8));
+        //then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("뇌를 자극하는 c++"))
+                .andExpect(jsonPath("$.auther").value("이두희"))
+                .andDo(MockMvcResultHandlers.print());
+
 
     }
 
