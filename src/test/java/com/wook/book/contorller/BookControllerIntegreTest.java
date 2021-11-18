@@ -97,5 +97,24 @@ public class BookControllerIntegreTest {
 
     }
 
+    @Test
+    @DisplayName("id를 통해 한건 가져오기 통합 테스트")
+    public void findById() throws Exception{
+        //given
+        Long id = 4L;
+        Book book = new Book(null,"뇌를 자극하는 c++","이두희");
+        bookRepository.save(book);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/book/{id}",id)
+                                            .accept(MediaType.APPLICATION_JSON_UTF8));
+
+        //then
+        resultActions
+                .andExpect(jsonPath("$.title").value("뇌를 자극하는 c++"))
+                .andExpect(jsonPath("$.auther").value("이두희"))
+                .andDo(MockMvcResultHandlers.print());
+
+    }
 
 }
